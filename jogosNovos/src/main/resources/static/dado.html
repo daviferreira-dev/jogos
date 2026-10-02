@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Adivinhe o Dado</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .caixa { background: white; padding: 20px; border-radius: 8px; max-width: 500px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, button { padding: 8px; margin: 4px 0; font-size: 16px; }
+        button { cursor: pointer; }
+        #resultado { margin-top: 15px; font-size: 18px; font-weight: bold; }
+        .ok { color: green; }
+        .erro { color: crimson; }
+    </style>
+</head>
+<body>
+    <div class="caixa">
+        <h2>Adivinhe o Dado</h2>
+        <label>Seu nome:<br><input id="nome" type="text"></label><br>
+        <label>Palpite (1 a 6):<br><input id="palpite" type="number" min="1" max="6"></label><br>
+        <button onclick="jogar()">Jogar</button>
+        <div id="resultado"></div>
+        <p><a href="index.html">Voltar</a></p>
+    </div>
+
+    <script>
+        async function jogar() {
+            const nome = document.getElementById('nome').value.trim() || 'Jogador';
+            const palpite = document.getElementById('palpite').value;
+            const div = document.getElementById('resultado');
+            if (palpite === '') { div.className = 'erro'; div.textContent = 'Digite um palpite.'; return; }
+            const r = await fetch('/api/dado/jogar?nome=' + encodeURIComponent(nome) + '&palpite=' + palpite);
+            const dados = await r.json();
+            div.className = dados.acertou ? 'ok' : 'erro';
+            div.textContent = dados.mensagem;
+        }
+    </script>
+</body>
+</html>
