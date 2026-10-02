@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo: Cara ou Coroa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .caixa {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .botao-lado {
+            font-size: 20px;
+            padding: 15px 30px;
+            margin: 5px;
+        }
+
+        #moeda {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 10px auto;
+            background: #f0c419;
+            border: 6px solid #c99a06;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: bold;
+            color: #6b4f00;
+        }
+
+        .girando {
+            animation: girar 0.6s ease-out;
+        }
+
+        @keyframes girar {
+            from {
+                transform: rotateY(0deg);
+            }
+
+            to {
+                transform: rotateY(720deg);
+            }
+        }
+
+        #mensagem {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .ganhou {
+            color: #28a745;
+        }
+
+        .perdeu {
+            color: #dc3545;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <p><a href="index.html">← Voltar ao menu</a></p>
+
+    <div class="caixa">
+        <h2>Cara ou Coroa</h2>
+        <p>Escolha o seu palpite:</p>
+        <button class="botao-lado" onclick="jogar('cara')">Cara</button>
+        <button class="botao-lado" onclick="jogar('coroa')">Coroa</button>
+    </div>
+
+    <div class="caixa">
+        <h2>Resultado</h2>
+        <div id="moeda">?</div>
+        <p id="mensagem">Faça o seu palpite!</p>
+        <p id="detalhes"></p>
+    </div>
+
+    <script>
+        // O Java devolve o enum pelo nome (CARA ou COROA). Esta lista só traduz o nome para exibir bonito.
+        const nomes = { CARA: 'Cara', COROA: 'Coroa' };
+
+        // Envia o palpite para o Java e mostra a resposta
+        async function jogar(palpite) {
+            // Caminho relativo (sem barra no começo) para funcionar também pela aba Ports do Code Server
+            const resposta = await fetch('caracoroa/jogar?palpite=' + encodeURIComponent(palpite));
+            const resultado = await resposta.json();
+
+            const mensagem = document.getElementById('mensagem');
+            mensagem.textContent = resultado.mensagem;
+            mensagem.className = resultado.acertou ? 'ganhou' : 'perdeu';
+
+            // Se o palpite foi inválido, o Java devolve o resultado vazio (a moeda nem foi lançada)
+            if (resultado.resultado) {
+                const moeda = document.getElementById('moeda');
+                moeda.textContent = nomes[resultado.resultado];
+
+                // Truque para o navegador reiniciar a animação de giro a cada jogada
+                moeda.classList.remove('girando');
+                void moeda.offsetWidth;
+                moeda.classList.add('girando');
+
+                document.getElementById('detalhes').textContent =
+                    'Seu palpite: ' + nomes[resultado.palpite] + ' | A moeda caiu em: ' + nomes[resultado.resultado];
+            }
+        }
+    </script>
+</body>
+
+</html>
